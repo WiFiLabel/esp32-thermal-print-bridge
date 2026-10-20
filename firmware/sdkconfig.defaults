@@ -1,0 +1,16 @@
+# Waveshare ESP32-P4-NANO defaults (refine after first board bring-up)
+
+CONFIG_IDF_TARGET="esp32p4"
+
+# 16 MB NOR flash on board
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_OFFSET=0x8000
+
+# PSRAM (32 MB stacked in package)
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_200M=y
+
+# USB host (printer class bring-up on day 1+)
+CONFIG_USB_HOST_HUBS_SUPPORTED=y

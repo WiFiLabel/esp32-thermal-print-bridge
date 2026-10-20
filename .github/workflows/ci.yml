@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Placeholder until Espressif Docker/IDF CI image is wired for esp32p4.
+  # Keeps the badge green and documents intent.
+  tree-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require firmware layout
+        run: |
+          test -f firmware/CMakeLists.txt
+          test -f firmware/main/main.c
+          test -f scripts/send_9100.py

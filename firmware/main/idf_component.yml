@@ -1,0 +1,5 @@
+## Wi-Fi 6 / BLE on ESP32-P4-NANO via onboard ESP32-C6 (SDIO)
+dependencies:
+  espressif/esp_hosted: '*'
+  espressif/esp_wifi_remote: '*'
+  espressif/usb: '*'
