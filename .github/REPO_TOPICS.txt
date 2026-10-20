@@ -1,2 +1,0 @@
-Suggested GitHub topics (set in repo Settings → Topics):
-esp32, esp32-p4, thermal-printer, zpl, jetdirect, print-server, usb-host, waveshare
