@@ -151,7 +151,7 @@ static bool build_page(const char *notice)
                       "<p class=\"hint\">Leave the password empty for an open network. "
                       "Otherwise it needs 8 or more characters.</p>"
                       "<button type=\"submit\">Save</button></form>");
-    web_ui_close(&out);
+    web_ui_close(&out, "setup");
     return !out.full;
 }
 
@@ -330,7 +330,7 @@ static esp_err_t join_post(httpd_req_t *req)
     web_ui_text(&out, "<h1>Saved</h1><p>The Bridge is joining ");
     web_ui_html(&out, creds.ssid);
     web_ui_text(&out, ". This page turns off in a moment.</p>");
-    web_ui_close(&out);
+    web_ui_close(&out, "saved");
     if (!out.full) {
         httpd_resp_set_type(req, "text/html");
         httpd_resp_set_hdr(req, "Cache-Control", "no-store");

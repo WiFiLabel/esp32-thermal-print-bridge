@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <sys/select.h>
 
 #include "esp_log.h"
 #include "esp_mac.h"
@@ -753,7 +754,7 @@ static void http_status_page(int sock)
     web_ui_row(&out, "Address", address);
     web_ui_row(&out, "IPP", "631 /ipp/print");
     web_ui_row(&out, "Raw", "TCP 9100");
-    web_ui_close(&out);
+    web_ui_close(&out, "status");
     int bl = (int)(out.cursor - body);
     if (out.full || bl <= 0) {
         free(body);
@@ -800,22 +801,59 @@ static int read_headers(int sock, char *buf, size_t buflen)
 {
     size_t n = 0;
     while (n + 1 < buflen) {
-        int r = recv_some(sock, (uint8_t *)buf + n, 1);
-        if (r <= 0) {
+        /* Peek so a chunked read cannot swallow the IPP body that follows the headers. */
+        int peeked = recv(sock, buf + n, buflen - 1 - n, MSG_PEEK);
+        if (peeked < 0 && errno == EINTR) {
+            continue;
+        }
+        if (peeked <= 0) {
             return -1;
         }
-        n += (size_t)r;
+        buf[n + (size_t)peeked] = '\0';
+        char *end = strstr(buf, "\r\n\r\n");
+        size_t take = (size_t)peeked;
+        if (end) {
+            take = (size_t)(end + 4 - buf) - n;
+        }
+        int got = 0;
+        while (got < (int)take) {
+            int r = recv_some(sock, (uint8_t *)buf + n + (size_t)got, take - (size_t)got);
+            if (r < 0 && errno == EINTR) {
+                continue;
+            }
+            if (r <= 0) {
+                return -1;
+            }
+            got += r;
+        }
+        n += take;
         buf[n] = '\0';
-        if (n >= 4 && memcmp(buf + n - 4, "\r\n\r\n", 4) == 0) {
+        if (end) {
             return 0;
         }
     }
     return -1;
 }
 
+static bool request_is_waiting(int sock)
+{
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(sock, &rfds);
+    struct timeval tv = {.tv_sec = 0, .tv_usec = 400000};
+    int sel = select(sock + 1, &rfds, NULL, NULL, &tv);
+    return sel > 0 && FD_ISSET(sock, &rfds);
+}
+
 static void handle_client(int sock)
 {
-    net_tune_accepted(sock, 120000);
+    int nodelay = 1;
+    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+    /* A quiet socket must not sit in front of the browser for the old 120s timeout. */
+    net_tune_accepted(sock, 5000);
+    if (!request_is_waiting(sock)) {
+        return;
+    }
 
     char *headers = malloc(4096);
     if (!headers) {
@@ -831,9 +869,11 @@ static void handle_client(int sock)
     sscanf(headers, "%7s", method);
     if (strcasecmp(method, "GET") == 0) {
         http_status_page(sock);
+        shutdown(sock, SHUT_WR);
         free(headers);
         return;
     }
+    net_tune_accepted(sock, 120000);
     if (strcasecmp(method, "POST") != 0) {
         http_text(sock, 405, "Method Not Allowed", "POST or GET\n");
         free(headers);
@@ -1018,7 +1058,7 @@ static void ipp_task(void *arg)
 {
     (void)arg;
     while (true) {
-        int listen_sock = net_listen_tcp(IPP_PORT, 2);
+        int listen_sock = net_listen_tcp(IPP_PORT, 8);
         if (listen_sock < 0) {
             ESP_LOGW(TAG, "bind :%d failed, errno %d; retry", IPP_PORT, errno);
             vTaskDelay(pdMS_TO_TICKS(2000));

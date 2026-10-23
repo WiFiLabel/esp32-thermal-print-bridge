@@ -41,8 +41,8 @@ static const char WEB_UI_CSS[] =
 
 static const char WEB_UI_CARD[] = "</style></head><body><main class=\"wrap\"><section class=\"card\">";
 
-static const char WEB_UI_END[] = "<p class=\"foot\"><a href=\"https://wifilabel.com/\" target=\"_blank\" "
-                                  "rel=\"noopener noreferrer\">wifilabel.com</a></p></section></main></body></html>";
+static const char WEB_UI_END_TAIL[] = "\" target=\"_blank\" rel=\"noopener noreferrer\">wifilabel.com</a></p>"
+                                       "</section></main></body></html>";
 
 void web_ui_out_init(web_ui_out_t *out, char *storage, size_t storage_len)
 {
@@ -103,9 +103,14 @@ void web_ui_open(web_ui_out_t *out)
     web_ui_text(out, WEB_UI_CARD);
 }
 
-void web_ui_close(web_ui_out_t *out)
+void web_ui_close(web_ui_out_t *out, const char *page)
 {
-    web_ui_text(out, WEB_UI_END);
+    if (!page || !page[0]) {
+        page = "device";
+    }
+    web_ui_text(out, "<p class=\"foot\"><a href=\"https://wifilabel.com/?utm_source=bridge&amp;utm_medium=page&amp;utm_content=");
+    web_ui_html(out, page);
+    web_ui_text(out, WEB_UI_END_TAIL);
 }
 
 void web_ui_row(web_ui_out_t *out, const char *label, const char *value)

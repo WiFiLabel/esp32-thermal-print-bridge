@@ -49,10 +49,16 @@ bool net_send_all(int sock, const void *data, size_t len)
 {
     const uint8_t *bytes = data;
     size_t off = 0;
+    int again = 0;
     while (off < len) {
         int n = send(sock, bytes + off, len - off, 0);
         if (n < 0) {
-            if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+            if (errno == EINTR) {
+                continue;
+            }
+            /* A send timeout comes back as EAGAIN. Retrying forever pins the accept loop. */
+            if ((errno == EAGAIN || errno == EWOULDBLOCK) && again < 20) {
+                again++;
                 vTaskDelay(pdMS_TO_TICKS(10));
                 continue;
             }
@@ -61,6 +67,7 @@ bool net_send_all(int sock, const void *data, size_t len)
         if (n == 0) {
             return false;
         }
+        again = 0;
         off += (size_t)n;
     }
     return true;
