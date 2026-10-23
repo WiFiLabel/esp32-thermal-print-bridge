@@ -4,8 +4,8 @@ dependencies:
   espressif/esp_wifi_remote: '1.6.5'
   espressif/usb: '1.6.0'
   espressif/mdns: '1.14.0'
-  # Keep this SHA identical to web/toolkit-rev.
+  # C component from the npm release tag.
   label_toolkit:
     git: https://github.com/WiFiLabel/label-toolkit.git
     path: c
-    version: 646fc5542ad0df30a4fb3d60cc005d878b82f50a
+    version: v0.1.0
