@@ -8,9 +8,27 @@ CONFIG_PARTITION_TABLE_CUSTOM=y
 CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
 CONFIG_PARTITION_TABLE_OFFSET=0x8000
 
-# PSRAM (32 MB stacked in package)
+# PSRAM (32 MB stacked in package). Large raster buffers go to external RAM.
 CONFIG_SPIRAM=y
 CONFIG_SPIRAM_SPEED_200M=y
+CONFIG_SPIRAM_USE_MALLOC=y
 
-# USB host (printer class bring-up on day 1+)
+# Onboard IP101GRI RMII (pin map is also set in net_bringup.c)
+CONFIG_ETH_USE_ESP32_EMAC=y
+
+# Wi-Fi 6 via the onboard ESP32-C6 over SDIO. Pins match the NANO / Function-EV board.
+CONFIG_ESP_WIFI_REMOTE_ENABLED=y
+CONFIG_ESP_WIFI_REMOTE_LIBRARY_HOSTED=y
+CONFIG_SLAVE_IDF_TARGET_ESP32C6=y
+CONFIG_ESP_HOSTED_P4_DEV_BOARD_FUNC_BOARD=y
+CONFIG_ESP_HOSTED_HOST_TRANSPORT_BUS_SDIO=y
+
+# USB host (printer class on the USB-A high-speed port)
 CONFIG_USB_HOST_HUBS_SUPPORTED=y
+
+# Setup page (HTTP) plus the print listeners and DNS hijack share this pool.
+CONFIG_LWIP_MAX_SOCKETS=16
+
+# A new app stays unconfirmed until it gets an IP. A reboot before that
+# returns to the previous slot. The bootloader must be flashed for this to apply.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y

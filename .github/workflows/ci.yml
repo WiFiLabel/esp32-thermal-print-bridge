@@ -6,14 +6,11 @@ on:
   pull_request:
 
 jobs:
-  # Placeholder until Espressif Docker/IDF CI image is wired for esp32p4.
-  # Keeps the badge green and documents intent.
-  tree-check:
+  idf-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Require firmware layout
+      - name: Build firmware for esp32p4
         run: |
-          test -f firmware/CMakeLists.txt
-          test -f firmware/main/main.c
-          test -f scripts/send_9100.py
+          docker run --rm -v "$PWD":/work -w /work/firmware espressif/idf:release-v6.0 \
+            bash -lc 'git config --global --add safe.directory "*" && idf.py set-target esp32p4 && idf.py build'

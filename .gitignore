@@ -3,6 +3,7 @@ firmware/sdkconfig
 firmware/sdkconfig.old
 firmware/dependencies.lock
 firmware/managed_components/
+firmware/.ota-token
 .DS_Store
 *.pyc
 __pycache__/

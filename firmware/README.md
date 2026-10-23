@@ -27,11 +27,14 @@ idf.py -p PORT flash monitor
 
 | Module | File | Status |
 |--------|------|--------|
-| USB HS host scaffold | `main/usb_printer.c` | Host lib installed; printer class BULK OUT stub |
-| TCP 9100 listener | `main/net_9100.c` | Accept + forward bytes to `usb_printer_write` |
-| Label wrappers | `main/label_proto.c` | ZPL `^GFA`, EPL2 `GW`, TSPL2 `BITMAP` |
+| USB HS printer class | `main/usb_printer.c` | Bulk OUT, PSRAM ring |
+| Ethernet, then Wi-Fi | `main/net_bringup.c` | Onboard RJ45 preferred, C6 Wi-Fi fallback |
+| Wi-Fi setup page | `main/portal.c` | Port 80 on Ethernet; open setup network only with no cable |
+| TCP 9100 listener | `main/net_9100.c` | Raw bytes to the printer, replies back to the client |
+| IPP Everywhere | `main/ipp_server.c` | Port 631, `_ipp._tcp` |
+| Raster to ZPL | `main/raster_zpl.c` | `image/pwg-raster` and `image/urf` to a 4x6 `^GFA` via `label_toolkit` |
+| App update | `main/app_ota.c` | Closed until `firmware/.ota-token` exists |
 | Dual OTA partitions | `partitions.csv` | `ota_0` / `ota_1` on 16 MB flash |
-| Ethernet / Wi-Fi / mDNS | - | Planned |
 
 ## Host smoke test
 

@@ -1,0 +1,16 @@
+menu "WiFiLabel"
+
+    config WIFILABEL_WIFI_SSID
+        string "Fallback Wi-Fi SSID"
+        default ""
+        help
+            Used when Ethernet has no link. An NVS string wifilabel/ssid overrides this.
+            Leave empty to stay on Ethernet only.
+
+    config WIFILABEL_WIFI_PASSWORD
+        string "Fallback Wi-Fi password"
+        default ""
+        help
+            NVS string wifilabel/pass overrides this. Empty password means an open network.
+
+endmenu

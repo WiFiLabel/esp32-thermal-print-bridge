@@ -1,5 +1,11 @@
 ## Wi-Fi 6 / BLE on ESP32-P4-NANO via onboard ESP32-C6 (SDIO)
 dependencies:
-  espressif/esp_hosted: '*'
-  espressif/esp_wifi_remote: '*'
-  espressif/usb: '*'
+  espressif/esp_hosted: '3.0.10'
+  espressif/esp_wifi_remote: '1.6.5'
+  espressif/usb: '1.6.0'
+  espressif/mdns: '1.14.0'
+  # Keep this SHA identical to web/toolkit-rev.
+  label_toolkit:
+    git: https://github.com/WiFiLabel/label-toolkit.git
+    path: c
+    version: 646fc5542ad0df30a4fb3d60cc005d878b82f50a
